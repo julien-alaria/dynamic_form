@@ -131,26 +131,31 @@ function register_user($name, $lastname, $email, $password, $confirm_password, $
     }
 
     if (!validate_email($email)) {
-        return ['error' => 'Adresse email invalide.'];
+        // return ['error' => 'Adresse email invalide.'];
+        set_flash('error', 'Adresse email invalide.');
     }
 
     if (strlen($password) < 6) {
-        return ['error' => 'Le mot de passe doit contenir au moins 6 caractères.'];
+        // return ['error' => 'Le mot de passe doit contenir au moins 6 caractères.'];
+        set_flash('error', 'Le mot de passe doit contenir au moins 6 caractères.');
     }
 
     if ($password !== $confirm_password) {
-        return ['error' => 'Les mots de passe ne correspondent pas.'];
+        // return ['error' => 'Les mots de passe ne correspondent pas.'];
+        set_flash('error','Les mots de passe ne correspondent pas.');
     }
 
     if (get_user_by_email($email)) {
-        return ['error' => 'Cette adresse email est déjà utilisée.'];
+        // return ['error' => 'Cette adresse email est déjà utilisée.'];
+        set_flash('error', 'Cette adresse email est déjà utilisée.');
     }
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $user_id = create_user($name, $lastname, $email, $hashedPassword, $role);
 
     if (!$user_id) {
-        return ['error' => 'Erreur lors de la création de l\'utilisateur.'];
+        // return ['error' => 'Erreur lors de la création de l\'utilisateur.'];
+        set_flash('error', 'Erreur lors de la création de l\'utilisateur');
     }
 
     return ['success' => 'Utilisateur créé avec succès.', 'user_id' => $user_id];
@@ -190,7 +195,6 @@ function dashboard_media_stats() {
 
     $media_type = $_SESSION['media_type'] ?? null;
 
-
     $data = [
         'title' => 'Gestion des médias',
         'books' => $books,
@@ -199,6 +203,7 @@ function dashboard_media_stats() {
         'genres' => $genres,
         'edit_book' => $edit_book,
         'edit_movie' => $edit_movie,
+        'edit_video_game' => $edit_video_game,
         'media_type' => $media_type,
         'message' => 'Liste des médias enregistrés'
     ];
@@ -423,8 +428,7 @@ function dashboard_video_games_stats() {
 function dashboard_video_games_update() {
     if (is_post() && post('media-type') === 'video_game') {
 
-        $id = isset($_POST['video_game_id']) ? (int) clean_input($_POST['video_game_id']) : null;
-
+        $id = (int) clean_input(post('video_game_id'));
         $title = clean_input(post('title'));
         $publisher = clean_input(post('publisher'));
         $platform = clean_input(post('platform'));
@@ -450,20 +454,14 @@ function dashboard_video_games_update() {
 
         if (empty($title) || empty($publisher) || empty($platform) || empty($genre_id) || empty($minimum_age) || empty($description) || empty($stock)) {
             set_flash('error', 'Tous les champs sont obligatoires.');
-            return;
-        }
-
-        // 🟢 On met à jour si un ID est fourni
-        if ($id !== null) {
-            $updated = update_video_game($id, $title, $publisher, $platform, $genre_id, $minimum_age, $description, $image, $stock);
+        } else {
+             $updated = update_video_game($id, $title, $publisher, $platform, $genre_id, $minimum_age, $description, $image, $stock);
             if ($updated) {
                 set_flash('success', 'Jeu vidéo modifié avec succès');
             } else {
                 set_flash('error', 'Erreur lors de la modification');
             }
-        } else {
-            set_flash('error', 'ID du jeu vidéo manquant.');
-        }
+        }    
     }
 }
 
@@ -475,7 +473,7 @@ function dashboard_video_games_delete() {
     if (is_post('media-type') === 'delete_video_game') {
         $id = (int) clean_input(post('video_game_id'));
 
-        $delete_movie = delete_video_game($id); 
+        $delete_video_game = delete_video_game($id); 
     } if ($delete_video_game) {
         set_flash('success', 'Media supprimé de la base de donnée');
     } else {
@@ -549,7 +547,7 @@ function route_media_actions(&$edit_book, &$edit_movie, &$edit_video_game) {
                 } elseif (isset($_POST['delete_video_game'])) {
                     dashboard_video_games_delete();
                 } elseif (isset($_POST['admin_update']) && post('video_game_id')) {
-                    $edit_video_game = get_video_game_by_id('video_game_id');
+                    $edit_video_game = get_video_game_by_id(post('video_game_id'));
                 }
             break;
 

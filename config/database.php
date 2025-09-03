@@ -3,11 +3,11 @@
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'media_test');
 define('DB_USER', 'root');
-define('DB_PASS', '1234');
+define('DB_PASS', '123');
 define('DB_CHARSET', 'utf8');
 
 // Configuration générale de l'application
-define('BASE_URL', 'http://localhost/cannes-php-group2/public/');
+define('BASE_URL', 'http://localhost/dynamic_form/public/');
 define('APP_NAME', 'PHP MVC Starter');
 define('APP_VERSION', '1.0.0');
 
